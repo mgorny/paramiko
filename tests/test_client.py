@@ -33,7 +33,7 @@ import warnings
 import weakref
 from tempfile import mkstemp
 
-from pytest_relaxed import raises
+import pytest
 from mock import patch, Mock
 
 import paramiko
@@ -684,10 +684,10 @@ class PasswordPassphraseTests(ClientTest):
 
     # TODO: more granular exception pending #387; should be signaling "no auth
     # methods available" because no key and no password
-    @raises(SSHException)
     def test_passphrase_kwarg_not_used_for_password_auth(self):
-        # Using the "right" password in the "wrong" field shouldn't work.
-        self._test_connection(passphrase="pygmalion")
+        with pytest.raises(SSHException):
+            # Using the "right" password in the "wrong" field shouldn't work.
+            self._test_connection(passphrase="pygmalion")
 
     def test_passphrase_kwarg_used_for_key_passphrase(self):
         # Straightforward again, with new passphrase kwarg.
@@ -705,14 +705,14 @@ class PasswordPassphraseTests(ClientTest):
             password="television",
         )
 
-    @raises(AuthenticationException)  # TODO: more granular
     def test_password_kwarg_not_used_for_passphrase_when_passphrase_kwarg_given(  # noqa
         self
     ):
         # Sanity: if we're given both fields, the password field is NOT used as
         # a passphrase.
-        self._test_connection(
-            key_filename=_support("test_rsa_password.key"),
-            password="television",
-            passphrase="wat? lol no",
-        )
+        with pytest.raises(AuthenticationException):
+            self._test_connection(
+                key_filename=_support("test_rsa_password.key"),
+                password="television",
+                passphrase="wat? lol no",
+            )
